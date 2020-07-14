@@ -27,12 +27,7 @@ class Chess():
         for i in range(self.length):
             for j in range(self.length):
                 grid[i][j] = box[i * 15 + j]
-                # grid[i][j] = 0
         grid = np.array(grid)
-        # grid[8][8] = 2
-
-        # box = box.reshape((self.length, self.length))
-        # box[7,8] = 2
         return grid
     
     def isTerminalwindow(self, window):
@@ -166,7 +161,6 @@ class Chess():
                             f.write(str(scores[(i,j)])+'\t')
                     f.write('\n')
         print(100 * max_cols[0][0] + max_cols[0][1])
-        # print(201)
 
     def check(self, x):
         with open('test', 'w') as t:
