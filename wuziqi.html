@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>wuziqi</title>
+<script src="jquery-3.2.1.min.js"></script>
+</head>
+<body>
+<style type="text/css">
+</style>
+<canvas id="pan" width="800" height="800" style="border:1px solid #000000; position: absolute; top: 50%;left: 50%;transform: translate(-50%, -50%); box-shadow: 5px 5px 2px #000010">
+</canvas>
+<script type="text/javascript">
+	var c=document.getElementById('pan');
+	var num = 0;
+	var time = 0;
+	// var chess=new Array();
+	// for(var k=0;k<15;k++){
+	// 	chess[k]=new Array();
+	// 	    for (var i = 0; i < 30; i++) {
+	// 		   chess[k][i]=0;
+	// 	}
+	// }
+	var qi=new Array();
+	for(var k=0;k<15;k++){
+		qi[k]=new Array();
+		    for (var i = 0; i < 15; i++) {
+			   qi[k][i]=0;
+		}
+	}
+	// var codechess=new Array();
+	// for (var i = 0; i < 15; i++) {
+	// 	codechess[i]=new Array();
+	// 	for (var j = 0; j < 8; j++) {
+	// 		codechess[i][j]=0;
+	// 	}
+	// }
+	var ctx=c.getContext('2d');
+	ctx.fillStyle = "#F5DEB3";
+	ctx.fillRect(0,0,800,800);
+	for (var i = 50; i <=750; i+=50) {
+		ctx.moveTo(i,50);
+		ctx.lineTo(i,750);
+		ctx.stroke();
+	}
+	for (var j = 50; j <=750; j+=50) {
+		ctx.moveTo(50,j);
+		ctx.lineTo(750,j);
+		ctx.stroke();
+	}
+	c.addEventListener("mousedown",doMousedown,false);
+	// function code()
+	// {
+	// 	for (var i = 0; i < 15; i++) {
+	// 		for(var j = 0; j< 8; j++){
+    //             if (j==0) {
+    //             	codechess[i][0] = 2*chess[i][0]+chess[i][1];
+    //             }
+    //             else{
+    //             	codechess[i][j]=8*chess[i][4*j-2]+4*chess[i][4*j-1]+2*chess[i][4*j]+chess[i][4*j+1];
+    //             	if (codechess[i][j]==10) {
+    //             		codechess[i][j]="A";
+    //             	}
+    //             }
+	// 		}
+	// 	}//console.log(codechess);
+		 //console.log(chess);
+	// }
+	function timecount(){
+		time++;
+		if (time == 30) {
+			alert("Time Out!");
+		}
+		//console.log(time);
+	}
+	function win(x,y){
+		var total = 1;
+		var yin = 0;
+		if (x>=2) {
+		for (var i = x-2; i >=0; i--) {
+			if (qi[i][y-1]==qi[x-1][y-1]) {
+				total++;
+			}else break;
+		}
+	}
+		for (var i = x; i < 15; i++) {
+			if (qi[i][y-1]==qi[x-1][y-1]) {
+				total++;
+			}else break;
+		}
+		if (total>=5) {
+			yin = 1;
+		}else{
+			total=1;
+		}
+		if (y>=2) {
+		for (var i = y-2; i >=0; i--) {
+			if (qi[x-1][i]==qi[x-1][y-1]) {
+				total++;
+			}else break;
+		}
+	}
+		for (var i = y; i < 15; i++) {
+			if (qi[x-1][i]==qi[x-1][y-1]) {
+				total++;
+			}else break;
+		}
+		if (total>=5) {
+			yin = 1;
+		}else{
+			total=1;
+		}
+		var i = x-1;
+		var j = y-1;
+		while(i>=1&&j>=1){
+			if (qi[i-1][j-1]==qi[x-1][y-1]) {
+				total++;
+				i--;
+				j--;
+			}else{
+				i = x;
+				j = y;
+				break;
+			}
+		}
+		while(i<15&&j<15){
+			if (qi[i][j]==qi[x-1][y-1]) {
+				total++;
+				i++;
+				j++;
+			}else{
+				break;
+			}
+		}if (total>=5) {
+			yin = 1;
+		}else{
+			total = 1;
+		}
+		var i = x-1;
+		var j = y-1;
+		while(i>=1&&j<15){
+			if (qi[i-1][j+1]==qi[x-1][y-1]) {
+				total++;
+				i--;
+				j++;
+			}else{
+				i = x;
+				j = y-2;
+				break;
+			}
+		}
+		while(i<15&&j>=0){
+			if (qi[i][j]==qi[x-1][y-1]) {
+				total++;
+				i++;
+				j--;
+			}else{
+				break;
+			}
+		}if (total>=5) {
+			yin = 1;
+		}else{
+			total = 1;
+		}
+
+          if (yin == 1) {
+          	if (qi[x-1][y-1]==1) {
+				alert("The White Win");
+			    }
+				else{
+					if (num>=5) {
+					alert("The Black Win");
+				}
+				}
+          }
+	}
+	function draw(nw,ny){
+		//alert(nx);
+		//alert(ny);
+		if (nw>0&&nw<800&&ny>0&&ny<800) {
+		ctx.beginPath();
+		ctx.arc(nw,ny,15,0,Math.PI*2,false);
+		if (!(num%2)) {
+		ctx.fillStyle="#000000";
+		ctx.fill();
+		ctx.closePath();
+		num++;
+		// code();
+		func();
+		win(nw/50,ny/50);
+	      }else{
+	    ctx.fillStyle="#FFFFFF";
+		ctx.fill();
+		ctx.closePath();
+		num++;
+		// code();
+		//func();
+		//alert(nw/50);
+		win(nw/50,ny/50);
+	      }
+	   }
+	}
+	function getPoint(canvas,x,y){
+		var box = c.getBoundingClientRect();
+		{
+			//alert (box.top);
+			return{ x: x-box.left*(canvas.width/box.width),
+				y: y-box.top*(canvas.height/box.height)
+
+			};
+		}
+	}
+	function dro(zx,zy){		
+		var k1 = zx%50;
+		var k2 = zy%50;
+		var t1 = (zx-k1)/50;
+		var t2 = (zy-k2)/50;
+		if(k1>=25) t1++;
+		if(k2>=25) t2++;
+		//alert(t2);
+		if (t1 == 0|| t2 == 0||t1 == 16||t2 == 16) {
+			return {
+				x:0,
+				y:0};
+			}
+		else if (qi[t1-1][t2-1] != 0) {
+			alert("You cannot drop here");
+			return{
+				x:0,
+				y:0};
+		}
+		else if (num%2){
+        // chess[t2-1][2*t1-1]=1;
+        qi[t1-1][t2-1]=1;
+        }//white
+        else if (!(num%2)) {
+        // chess[t2-1][2*t1-2]=1;
+        qi[t1-1][t2-1]=2;
+        }//black
+        return{
+			x: 50*(t1),
+			y: 50*(t2)
+		};
+	}
+     //dro(400,400);
+	 //draw(400,400);//先手
+
+
+
+	  function doMousedown(event){
+	  	var x = event.pageX;
+	  	var y = event.pageY;
+	  	var canvas = event.target;
+	  	var loc = getPoint(canvas,x,y);
+	  	var drop = dro(loc.x,loc.y);
+	  	time = 0;	  	
+	  	draw(drop.x,drop.y);
+	  }
+	  function func(){
+	    $.ajax({
+	          type :"POST",
+	          data:{chessBox:qi},
+	          dataType:"json",
+	          url: "connectpy.php",
+	          async: false,
+	          success:function(data, status){
+						console.log(data);
+						data = data + 101
+	  	          		y = data % 100 ;
+	  	          		x = (data - y) / 100 ;
+	  	          		dro(50*x,50*y);
+	  	          		// alert(qi);
+                        draw(50*x,50*y);	
+                        time = 0;
+	          },
+			  error:function(data){
+          				alert('error');
+        		}
+	       });
+	}
+	  var timer = setInterval("timecount()", 1000);
+</script>
+</body>
+</html>
