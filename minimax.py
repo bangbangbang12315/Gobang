@@ -1,7 +1,7 @@
 '''
 @Author: DB
 @Date: 2020-07-06 12:45:33
-@LastEditTime: 2020-07-06 22:00:55
+@LastEditTime: 2020-07-18 22:03:30
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /wuziqi/minimax.py
@@ -13,20 +13,24 @@ import copy
 class Chess():
     def __init__(self):
         self.length = 15
-        self.chess_Box = self.loadChess()
-        self.debug = True
+        self.debug = False
         self.player = 1
+        self.chess_Box = self.loadChess()
         if self.debug:
             self.check(self.chess_Box)
 
     def loadChess(self):
-        tmp = sys.argv[1]
-        box = tmp.strip().split(',')
-        box = list(map(lambda x: int(x), box))
-        grid = [[0] * self.length for i in range(self.length)]
-        for i in range(self.length):
-            for j in range(self.length):
-                grid[i][j] = box[i * 15 + j]
+        if not self.debug:
+            tmp = sys.argv[1]
+            box = tmp.strip().split(',')
+            box = list(map(lambda x: int(x), box))
+            grid = [[0] * self.length for i in range(self.length)]
+            for i in range(self.length):
+                for j in range(self.length):
+                    grid[i][j] = box[i * 15 + j]
+        else:
+            grid = [[0] * self.length for i in range(self.length)]
+            grid[7][8] = 1
         grid = np.array(grid)
         return grid
     
@@ -141,10 +145,36 @@ class Chess():
                 child = self.drop(grid, p[0], p[1], mark%2+1)
                 value = min(value, self.miniMax(child, depth-1, True, mark))
         return value
+    
+    def alphaBeta(self, grid, depth, alpha, beta, maximizingPlayer, mark):
+        isterminal = self.win(grid)
+        candidate = self.genCandidate(grid, depth)
+        if depth == 0 or isterminal:
+            return self.evaluate(grid, mark)
+        if maximizingPlayer:
+            for p in candidate:
+                child = self.drop(grid, p[0], p[1], mark)
+                alpha = max(alpha, self.alphaBeta(child, depth-1, alpha, beta, False, mark))
+                if alpha >= beta:
+                    return beta
+            return alpha
+        else:
+            for p in candidate:
+                child = self.drop(grid, p[0], p[1], mark%2+1)
+                beta = min(beta, self.alphaBeta(child, depth-1, alpha, beta, True, mark))
+                if beta <= alpha:
+                    return alpha
+            return beta
+
+        
+
 
     def score_move_improvement(self, grid, x, y, mark, nsteps):
         next_grid = self.drop(grid, x, y, mark)
-        score = self.miniMax(next_grid, nsteps-1, False, mark)
+        # score = self.miniMax(next_grid, nsteps-1, False, mark)
+        alpha = -np.inf
+        beta = np.inf
+        score = self.alphaBeta(next_grid, nsteps-1, alpha, beta, False, mark)
         return score
         
     def agent(self):
