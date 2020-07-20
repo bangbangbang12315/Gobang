@@ -1,7 +1,7 @@
 '''
 @Author: DB
 @Date: 2020-07-06 12:45:33
-@LastEditTime: 2020-07-18 22:03:30
+@LastEditTime: 2020-07-20 19:19:15
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /wuziqi/minimax.py
@@ -14,13 +14,14 @@ class Chess():
     def __init__(self):
         self.length = 15
         self.debug = False
+        self.selfplay = True
         self.player = 1
         self.chess_Box = self.loadChess()
         if self.debug:
             self.check(self.chess_Box)
 
     def loadChess(self):
-        if not self.debug:
+        if not self.debug and not self.selfplay:
             tmp = sys.argv[1]
             box = tmp.strip().split(',')
             box = list(map(lambda x: int(x), box))
@@ -30,7 +31,6 @@ class Chess():
                     grid[i][j] = box[i * 15 + j]
         else:
             grid = [[0] * self.length for i in range(self.length)]
-            grid[7][8] = 1
         grid = np.array(grid)
         return grid
     
@@ -166,9 +166,6 @@ class Chess():
                     return alpha
             return beta
 
-        
-
-
     def score_move_improvement(self, grid, x, y, mark, nsteps):
         next_grid = self.drop(grid, x, y, mark)
         # score = self.miniMax(next_grid, nsteps-1, False, mark)
@@ -178,8 +175,8 @@ class Chess():
         return score
         
     def agent(self):
-        candidate = self.genCandidate(self.chess_Box, 2)
-        scores = dict(zip(candidate, [self.score_move_improvement(self.chess_Box, p[0], p[1], self.player, 1) for p in candidate]))
+        candidate = self.genCandidate(self.chess_Box, 1)
+        scores = dict(zip(candidate, [self.score_move_improvement(self.chess_Box, p[0], p[1], self.player, 2) for p in candidate]))
         max_cols = [key for key in scores.keys() if scores[key] == max(scores.values())]
         if self.debug:
             with open('candidate', 'w') as f:
@@ -198,6 +195,9 @@ class Chess():
                 for w in col:
                     t.write(str(w) + '\t')
                 t.write('\n')
+
+    def selfPlay(self, mark):
+        pass
             
 if __name__ == "__main__":
     chess = Chess()
