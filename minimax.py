@@ -1,7 +1,7 @@
 '''
 @Author: DB
 @Date: 2020-07-06 12:45:33
-@LastEditTime: 2020-07-20 19:19:15
+@LastEditTime: 2020-07-27 16:23:33
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /wuziqi/minimax.py
@@ -10,13 +10,27 @@ import sys
 import numpy as np
 import json
 import copy
+import logging
+from mcts import Mctsplayer
+LOG_FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
+log_file = 'test.log'
+logging.basicConfig(format=LOG_FORMAT, 
+                    level=getattr(logging, 'INFO'),
+                    filename=log_file,
+                    filemode='w')
+logger = logging.getLogger()
+
 class Chess():
-    def __init__(self):
+    def __init__(self, computer=None):
         self.length = 15
         self.debug = False
         self.selfplay = True
         self.player = 1
+        self.cur_player = 1
+        self.last_move = 0
+        self.availables = list(range(self.length * self.length))
         self.chess_Box = self.loadChess()
+        self.computer = computer
         if self.debug:
             self.check(self.chess_Box)
 
@@ -29,15 +43,21 @@ class Chess():
             for i in range(self.length):
                 for j in range(self.length):
                     grid[i][j] = box[i * 15 + j]
+                    if grid[i][j]:
+                        self.availables.remove(i * 15 + j)
         else:
             grid = [[0] * self.length for i in range(self.length)]
+            grid[6][7] = 2
         grid = np.array(grid)
         return grid
     
     def isTerminalwindow(self, window):
-        return window.count(1) == 5 or window.count(2) == 5
+        if window.count(1) == 5:
+            return 1
+        elif window.count(2) == 5:
+            return 2
+        return False
 
-    
     def win(self, grid):
         flatten = list(grid.flatten())
         if flatten.count(0) == 0:
@@ -129,6 +149,12 @@ class Chess():
         child[x, y] = mark
         return child
 
+    def move(self, action):
+        self.chess_Box[action // 15][action % 15] = self.cur_player
+        self.availables.remove(action)
+        self.cur_player = self.cur_player % 2 + 1
+        self.last_move = action
+
     def miniMax(self, grid, depth, maximizingPlayer, mark):
         isterminal = self.win(grid)
         candidate = self.genCandidate(grid, depth)
@@ -196,9 +222,12 @@ class Chess():
                     t.write(str(w) + '\t')
                 t.write('\n')
 
-    def selfPlay(self, mark):
-        pass
-            
-if __name__ == "__main__":
-    chess = Chess()
-    chess.agent()
+    def agent_mcts(self):
+        self.computer.set_player_ind(self.player)
+        act = self.computer.get_action(self)
+        print(act)
+    
+if __name__ == "__main__":    
+    mcts_agent = Mctsplayer(logger)
+    chess = Chess(mcts_agent)
+    chess.agent_mcts()
